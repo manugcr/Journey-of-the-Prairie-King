@@ -4,7 +4,7 @@ import random
 
 # Init pygame
 pygame.init()
-
+pygame.font.init()
 
 # Create screen resolution
 WIDTH = 400
@@ -78,8 +78,8 @@ class Enemy(Hooman):
 		self.hooman_img = enemy_image
 		self.mask = pygame.mask.from_surface(self.hooman_img)
 
-	def move(self, speed):
-		self.x += speed
+	def move(self, player):
+		self.x += player
 
 # Main class, set up game and game loop
 def main():
@@ -88,6 +88,8 @@ def main():
 	FPS = 120
 	clock = pygame.time.Clock()
 
+	# Fonts
+	font = pygame.font.SysFont('freesansbold.ttf', 32)
 
 	# Set enemy list, enemy speed and enemy amount
 	enemies = []
@@ -102,6 +104,12 @@ def main():
 
 	def redraw_window():
 		screen.blit(background, (0, 0))
+
+		lives_text = font.render(f'Lives: {lives}', 1, (255, 255, 255))
+		level_text = font.render(f'Level: {level}', 1, (255, 255, 255))
+
+		screen.blit(lives_text, (5, 2))
+		screen.blit(level_text, (WIDTH - level_text.get_width() - 5, 2))
 
 		# Draw enemy sprite ingame
 		for enemy in enemies:
@@ -171,5 +179,26 @@ def main():
 		redraw_window()
 		pygame.display.update()
 
+
+def main_menu():
+    font = pygame.font.SysFont("freesansbold.ttf", 30)
+    run = True
+    while run:
+        screen.blit(background, (0,0))
+        title_text = font.render("Press any key to begin...", 1, (255,255,255))
+        screen.blit(title_text, (int(WIDTH/2 - title_text.get_width()/2), int(HEIGHT/2 - title_text.get_height()/2)))
+        
+        pygame.display.update()
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+            if event.type == pygame.KEYDOWN:
+                main()
+    pygame.quit()
+
+
+
+
 # Call main function to start game
-main()
+main_menu()
