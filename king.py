@@ -50,18 +50,6 @@ class Hooman:
 	def get_height(self):
 		return self.hooman_img.get_height()
 
-# Ex child class of Hooman for player
-# class Player(Hooman):
-# 	def __init__(self, x, y, health = 100):
-# 		super().__init__(x, y, health)
-# 		self.hooman_img = player_img
-# 		self.bullet_img = bullet_img
-# 		self.mask = pygame.mask.from_surface(self.hooman_img)
-# 		self.max_health = health
-
-# 	def draw(self, window):
-# 		window.blit(self.hooman_img, (self.x, self.y))
-
 
 # Main player Class (No multiplayer in this game)
 class Player:
