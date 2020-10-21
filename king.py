@@ -79,9 +79,16 @@ class Enemy(Hooman):
 		self.hooman_img = enemy_image
 		self.mask = pygame.mask.from_surface(self.hooman_img)
 
-	def move(self, player):
-		self.x += player
+	def move(self, vel, x, y):
+		# Find direction vector (dx, dy) between enemy and player.
+		dx, dy = x - self.x, y - self.y
+		dist = math.hypot(dx, dy)
+		dx, dy = dx / dist, dy / dist  # Normalize.
+		# Move along this normalized vector towards the player at current speed.
+		self.x += dx * vel
+		self.y += dy * vel
 
+		
 # Main class, set up game and game loop
 def main():
 	
@@ -135,22 +142,21 @@ def main():
 
 			# Initialize enemies in loop
 			for i in range(wave_length):
-				door =  'left_door' # random.choice(['left_door', 'top_door', 'right_door', 'down_door'])
+				door = random.choice(['left_door', 'top_door', 'right_door', 'down_door'])
+				
+				# If condition
 				if door == 'left_door':
 					enemy = Enemy(random.randrange(-200, -20), random.randrange(180, 220))
 					enemies.append(enemy)
-				
-				# More doors, testing
-
-				# if door == 'top_door':
-				# 	enemy = Enemy(random.randrange(180, 220), random.randrange(-100, -20))
-				# 	enemies.append(enemy)
-				# if door == 'right_door':
-				# 	enemy = Enemy(random.randrange(420, 500), random.randrange(180, 220))
-				# 	enemies.append(enemy)
-				# if door == 'down_door':
-				# 	enemy = Enemy(random.randrange(180, 220), random.randrange(420, 500))
-				# 	enemies.append(enemy)
+				if door == 'top_door':
+					enemy = Enemy(random.randrange(180, 220), random.randrange(-100, -20))
+					enemies.append(enemy)
+				if door == 'right_door':
+					enemy = Enemy(random.randrange(420, 500), random.randrange(180, 220))
+					enemies.append(enemy)
+				if door == 'down_door':
+					enemy = Enemy(random.randrange(180, 220), random.randrange(420, 500))
+					enemies.append(enemy)
 
 
 		# QUIT event, dont delete
@@ -174,7 +180,7 @@ def main():
 
 		# Enemy movement, TODO: track player
 		for enemy in enemies:
-			enemy.move(enemy_speed)
+			enemy.move(enemy_speed, player.x, player.y)
 
 
 		# Redraw and update sprites, dont delete
@@ -183,21 +189,21 @@ def main():
 
 
 def main_menu():
-    font = pygame.font.SysFont("freesansbold.ttf", 30)
-    run = True
-    while run:
-        screen.blit(background, (0,0))
-        title_text = font.render("Press any key to begin...", 1, (255,255,255))
-        screen.blit(title_text, (int(WIDTH/2 - title_text.get_width()/2), int(HEIGHT/2 - title_text.get_height()/2)))
-        
-        pygame.display.update()
-        
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
-            if event.type == pygame.KEYDOWN:
-                main()
-    pygame.quit()
+	font = pygame.font.SysFont("freesansbold.ttf", 30)
+	run = True
+	while run:
+		screen.blit(background, (0,0))
+		title_text = font.render("Press any key to begin...", 1, (255,255,255))
+		screen.blit(title_text, (int(WIDTH/2 - title_text.get_width()/2), int(HEIGHT/2 - title_text.get_height()/2)))
+		
+		pygame.display.update()
+		
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				run = False
+			if event.type == pygame.KEYDOWN:
+				main()
+	pygame.quit()
 
 
 
