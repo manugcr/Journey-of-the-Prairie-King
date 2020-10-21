@@ -81,12 +81,20 @@ class Enemy(Hooman):
 
 	def move(self, vel, x, y):
 		# Find direction vector (dx, dy) between enemy and player.
-		dx, dy = x - self.x, y - self.y
+		dx = x - self.x
+		dy = y - self.y
+		print(f'x {x} - self.x {self.x}, dx {dx}')
+		print(f'y {y} - self.y {self.y}, dy {dy}')
 		dist = math.hypot(dx, dy)
-		dx, dy = dx / dist, dy / dist  # Normalize.
+		print(f'hip {dist}')
+
+		dx = dx / dist  # Normalize.
+		dy = dy / dist
+		print(f'NORMALIZE dx {dx} - dy {dy}\n')
 		# Move along this normalized vector towards the player at current speed.
 		self.x += dx * vel
 		self.y += dy * vel
+
 
 		
 # Main class, set up game and game loop
