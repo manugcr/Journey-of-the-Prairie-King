@@ -1,6 +1,7 @@
 import pygame
 import math
 import random
+import sys
 
 # Init pygame
 pygame.init()
@@ -156,6 +157,7 @@ def main():
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				run = False
+				sys.exit()
 
 
 		# Player movement key mapping
