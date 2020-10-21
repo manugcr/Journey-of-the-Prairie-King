@@ -74,7 +74,7 @@ class Enemy(Hooman):
 
 # Main player Class (No multiplayer in this game)
 class Player:
-	COOLDOWN = 30
+	COOLDOWN = 45
 
 	def __init__(self, x, y, health = 100):
 		self.x = x
@@ -169,8 +169,8 @@ def main():
 
 	# Initialize Player class in (x, y) coords
 	player = Player(200, 200)
-	player_speed = 2
-	bullet_speed = 3
+	player_speed = 1
+	bullet_speed = 2
 	bullets = []
 	level = 0
 	lives = 3
@@ -246,6 +246,16 @@ def main():
 		if keys[pygame.K_s] and player.y + player.get_height() < HEIGHT - 25: # -25 because map sprite has his own borders
 			player.y += player_speed
 		
+		# Diagonall shooting
+		if keys[pygame.K_LEFT] and keys[pygame.K_UP]:
+			player.shoot(-1, -1)
+		if keys[pygame.K_RIGHT] and keys[pygame.K_UP]:
+			player.shoot(1, -1)
+		if keys[pygame.K_LEFT] and keys[pygame.K_DOWN]:
+			player.shoot(-1, 1)
+		if keys[pygame.K_RIGHT] and keys[pygame.K_DOWN]:
+			player.shoot(1, 1)
+
 		# Shooting keys
 		if keys[pygame.K_LEFT]:
 			player.shoot(-1, 0)
@@ -255,7 +265,8 @@ def main():
 			player.shoot(0, -1)
 		if keys[pygame.K_DOWN]:
 			player.shoot(0, 1)
-			
+
+		
 			
 		# Enemy movement, TODO: track player
 		for enemy in enemies:
