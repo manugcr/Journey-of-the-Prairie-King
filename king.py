@@ -52,30 +52,6 @@ class Hooman:
 		return self.hooman_img.get_height()
 
 
-# Main player Class (No multiplayer in this game)
-class Player:
-	COOLDOWN = 30
-
-	def __init__(self, x, y, health = 100):
-		self.x = x
-		self.y = y
-		self.health = health
-		self.player_img = player_img
-		self.bullet_img = bullet_img
-		self.mask = pygame.mask.from_surface(self.player_img)
-		self.bullets = []
-		self.cooldown_counter = 0
-
-	def draw(self, window):
-		window.blit(self.player_img, (self.x, self.y))
-
-	def get_width(self):
-		return self.player_img.get_width()
-
-	def get_height(self):
-		return self.player_img.get_height()
-
-
 # Enemy 1 class, inherits from Hooman
 class Enemy(Hooman):
 	def __init__(self, x, y, health = 100):
@@ -94,6 +70,80 @@ class Enemy(Hooman):
 		# Move along this normalized vector towards the player at current speed.
 		self.x += dx * vel
 		self.y += dy * vel
+
+
+# Main player Class (No multiplayer in this game)
+class Player:
+	COOLDOWN = 30
+
+	def __init__(self, x, y, health = 100):
+		self.x = x
+		self.y = y
+		self.health = health
+		self.player_img = player_img
+		self.bullet_img = bullet_img
+		self.mask = pygame.mask.from_surface(self.player_img)
+		self.bullets = []
+		self.cooldown_counter = 0
+
+	def draw(self, window):
+		window.blit(self.player_img, (self.x, self.y))
+		for bullet in self.bullets:
+			bullet.draw(window)
+
+	def move_bullet(self, vel, objs):
+		self.cooldown()
+		for bullet in self.bullets:
+			bullet.move(vel, bullet.horiz, bullet.vertical)
+			for obj in objs:
+				if bullet.collision(obj):
+					objs.remove(obj)
+					if bullet in self.bullets:
+						self.bullets.remove(bullet)
+
+	def cooldown(self):
+		if self.cooldown_counter >= self.COOLDOWN:
+			self.cooldown_counter = 0
+		elif self.cooldown_counter > 0:
+			self.cooldown_counter += 1
+
+	def shoot(self, dir1, dir2):
+		if self.cooldown_counter == 0:
+			bullet = Bullet(self.x, self.y, dir1, dir2)
+			self.bullets.append(bullet)
+			self.cooldown_counter = 1
+
+	def get_width(self):
+		return self.player_img.get_width()
+
+	def get_height(self):
+		return self.player_img.get_height()
+
+
+class Bullet:
+	def __init__(self, x, y, horiz, vertical):
+		self.x = x
+		self.y = y
+		self.bullet_img = bullet_img
+		self.mask = pygame.mask.from_surface(self.bullet_img)
+		self.vertical = vertical
+		self.horiz = horiz
+
+	def draw(self, window):
+		window.blit(self.bullet_img, (self.x, self.y))
+
+	def collision(self, obj):
+		return collide(self, obj)
+
+	def move(self, vel, horiz, vertical):
+		if horiz == -1:
+			self.x += -vel
+		if horiz == 1:
+			self.x += vel
+		if vertical == -1:
+			self.y += -vel
+		if vertical == 1:
+			self.y += vel
 
 
 def collide(obj1, obj2):
@@ -120,8 +170,11 @@ def main():
 	# Initialize Player class in (x, y) coords
 	player = Player(200, 200)
 	player_speed = 2
+	bullet_speed = 3
+	bullets = []
 	level = 0
 	lives = 3
+	lost = False
 
 	def redraw_window():
 		screen.blit(background, (0, 0))
@@ -136,6 +189,10 @@ def main():
 		for enemy in enemies:
 			enemy.draw(screen)
 
+		if lost:
+			lost_text = font.render('You lost!', 1, (255, 255, 255))
+			screen.blit(lost_text, (int(WIDTH/2 - lost_text.get_width()/2), int(HEIGHT/2 - lost_text.get_height()/2)))
+
 		# Draw player sprite ingame
 		player.draw(screen)
 		pygame.display.update()
@@ -146,6 +203,9 @@ def main():
 
 		# Set ingame FPS
 		clock.tick(FPS)
+
+		if lives <= 0:
+			lost = True
 
 		if len(enemies) == 0:
 			level += 1
@@ -185,14 +245,28 @@ def main():
 			player.y -= player_speed
 		if keys[pygame.K_s] and player.y + player.get_height() < HEIGHT - 25: # -25 because map sprite has his own borders
 			player.y += player_speed
-
+		
+		# Shooting keys
+		if keys[pygame.K_LEFT]:
+			player.shoot(-1, 0)
+		if keys[pygame.K_RIGHT]:
+			player.shoot(1, 0)
+		if keys[pygame.K_UP]:
+			player.shoot(0, -1)
+		if keys[pygame.K_DOWN]:
+			player.shoot(0, 1)
+			
+			
 		# Enemy movement, TODO: track player
 		for enemy in enemies:
 			enemy.move(enemy_speed, player.x, player.y)
 
 			if collide(enemy, player):
 				print('collission')
-				enemies.remove(enemy)
+				lives -= 1
+				run = False
+			
+		player.move_bullet(bullet_speed, enemies)
 
 		# Redraw and update sprites, dont delete
 		redraw_window()
