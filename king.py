@@ -40,7 +40,7 @@ class Hooman:
 		self.hooman_img = None
 		self.bullet_img = None
 		self.bullets = []
-		self.bullet_cooldown = 0
+		self.cooldown_counter = 0
 
 	def draw(self, window):
 		window.blit(self.hooman_img, (int(self.x), int(self.y)))
@@ -54,14 +54,17 @@ class Hooman:
 
 # Main player Class (No multiplayer in this game)
 class Player:
+	COOLDOWN = 30
+
 	def __init__(self, x, y, health = 100):
 		self.x = x
 		self.y = y
 		self.health = health
 		self.player_img = player_img
 		self.bullet_img = bullet_img
+		self.mask = pygame.mask.from_surface(self.player_img)
 		self.bullets = []
-		self.bullet_cooldown = 0
+		self.cooldown_counter = 0
 
 	def draw(self, window):
 		window.blit(self.player_img, (self.x, self.y))
@@ -72,6 +75,7 @@ class Player:
 	def get_height(self):
 		return self.player_img.get_height()
 
+
 # Enemy 1 class, inherits from Hooman
 class Enemy(Hooman):
 	def __init__(self, x, y, health = 100):
@@ -80,21 +84,22 @@ class Enemy(Hooman):
 		self.mask = pygame.mask.from_surface(self.hooman_img)
 
 	def move(self, vel, x, y):
-		# Find direction vector (dx, dy) between enemy and player.
+		# Find direction vector between enemy and player.
 		dx = x - self.x
 		dy = y - self.y
-		print(f'x {x} - self.x {self.x}, dx {dx}')
-		print(f'y {y} - self.y {self.y}, dy {dy}')
 		dist = math.hypot(dx, dy)
-		print(f'hip {dist}')
-
-		dx = dx / dist  # Normalize.
-		dy = dy / dist
-		print(f'NORMALIZE dx {dx} - dy {dy}\n')
+		# Normalize vector.
+		dx = dx/dist
+		dy = dy/dist
 		# Move along this normalized vector towards the player at current speed.
 		self.x += dx * vel
 		self.y += dy * vel
 
+
+def collide(obj1, obj2):
+	offset_x = obj2.x - obj1.x
+	offset_y = obj2.y - obj1.y
+	return obj1.mask.overlap(obj2.mask, (int(offset_x), int(offset_y))) != None
 
 		
 # Main class, set up game and game loop
@@ -109,7 +114,7 @@ def main():
 
 	# Set enemy list, enemy speed and enemy amount
 	enemies = []
-	enemy_speed = 0.5
+	enemy_speed = 0.3
 	wave_length = 0
 
 	# Initialize Player class in (x, y) coords
@@ -133,7 +138,6 @@ def main():
 
 		# Draw player sprite ingame
 		player.draw(screen)
-
 		pygame.display.update()
 
 	# Game loop
@@ -142,7 +146,6 @@ def main():
 
 		# Set ingame FPS
 		clock.tick(FPS)
-
 
 		if len(enemies) == 0:
 			level += 1
@@ -166,13 +169,11 @@ def main():
 					enemy = Enemy(random.randrange(180, 220), random.randrange(420, 500))
 					enemies.append(enemy)
 
-
 		# QUIT event, dont delete
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				run = False
 				sys.exit()
-
 
 		# Player movement key mapping
 		keys = pygame.key.get_pressed()
@@ -185,11 +186,13 @@ def main():
 		if keys[pygame.K_s] and player.y + player.get_height() < HEIGHT - 25: # -25 because map sprite has his own borders
 			player.y += player_speed
 
-
 		# Enemy movement, TODO: track player
 		for enemy in enemies:
 			enemy.move(enemy_speed, player.x, player.y)
 
+			if collide(enemy, player):
+				print('collission')
+				enemies.remove(enemy)
 
 		# Redraw and update sprites, dont delete
 		redraw_window()
@@ -212,8 +215,6 @@ def main_menu():
 			if event.type == pygame.KEYDOWN:
 				main()
 	pygame.quit()
-
-
 
 
 # Call main function to start game
