@@ -15,7 +15,7 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 # Set title and icon 
 pygame.display.set_caption('Journey of the Prairie King')
-icon = pygame.transform.scale(pygame.image.load('assets/player.png'), (32, 32))
+icon = pygame.transform.scale(pygame.image.load('assets/icon.png'), (32, 32))
 pygame.display.set_icon(icon)
 
 # Music
@@ -29,10 +29,11 @@ enemy_dead2 = pygame.mixer.Sound('sounds/enemy_dead2.wav')
 #steps_sound = pygame.mixer.Sound('sounds/steps.wav')
 
 # Set background image
-background = pygame.transform.scale(pygame.image.load('assets/background.png'), (WIDTH, HEIGHT)).convert()
+# background = pygame.transform.scale(pygame.image.load('assets/background.png'), (WIDTH, HEIGHT)).convert()
+background_1 = pygame.transform.scale(pygame.image.load('assets/background_1.png'), (WIDTH, HEIGHT)).convert()
+background_2 = pygame.transform.scale(pygame.image.load('assets/background_2.png'), (WIDTH, HEIGHT)).convert()
 
 # Player sprites
-player_img = pygame.transform.scale(pygame.image.load('assets/player.png'), (20, 20))
 idle_img = pygame.transform.scale(pygame.image.load('assets/idle.png'), (20, 20))
 
 r1 = pygame.transform.scale(pygame.image.load('assets/r1.png'), (20, 20))
@@ -60,7 +61,6 @@ u4 = pygame.transform.scale(pygame.image.load('assets/u4.png'), (20, 20))
 sprites_u = [u1, u2, u3, u4]
 
 # Enemy image
-enemy_image = pygame.transform.scale(pygame.image.load('assets/enemy.png'), (20, 20))
 enemy_r = pygame.transform.scale(pygame.image.load('assets/enemy_right_foot.png'), (20, 20))
 enemy_l = pygame.transform.scale(pygame.image.load('assets/enemy_left_foot.png'), (20, 20))
 enemy_sprites = [enemy_l, enemy_l, enemy_r, enemy_r]
@@ -68,12 +68,14 @@ enemy_sprites = [enemy_l, enemy_l, enemy_r, enemy_r]
 # Set bullet image
 bullet_img = pygame.transform.scale(pygame.image.load('assets/bullet.png'), (5, 5))
 
+
 # Enemy base class, planning to implement more types.
 class Hooman:
-	def __init__(self, x, y, health = 100):
+	def __init__(self, x, y, health = 100, enemy_speed = 0.2):
 		self.x = x
 		self.y = y
 		self.health = health
+		self.enemy_speed = enemy_speed
 		self.hooman_img = None
 		self.bullet_img = None
 		self.bullets = []
@@ -91,13 +93,14 @@ class Hooman:
 
 # Enemy 1 class, inherits from Hooman
 class Enemy(Hooman):
-	def __init__(self, x, y, walk, health = 100):
-		super().__init__(x, y, health)
+	def __init__(self, x, y, walk, health = 100, enemy_speed = 0.2):
+		super().__init__(x, y, health, enemy_speed)
 		self.enemy_walk_count = walk
-		self.hooman_img = enemy_image
+		self.enemy_speed = random.uniform(0.2, 0.5)
+		self.hooman_img = enemy_sprites[0]
 		self.mask = pygame.mask.from_surface(self.hooman_img)
 
-	def move(self, vel, x, y):
+	def move(self,x, y):
 		# Find direction vector between enemy and player.
 		dx = x - self.x
 		dy = y - self.y
@@ -106,8 +109,8 @@ class Enemy(Hooman):
 		dx = dx/dist
 		dy = dy/dist
 		# Move along this normalized vector towards the player at current speed.
-		self.x += dx * vel
-		self.y += dy * vel
+		self.x += dx * self.enemy_speed 
+		self.y += dy * self.enemy_speed 
 
 	def draw(self, window, moving):
 		if self.enemy_walk_count + 1 >= 5:
@@ -115,10 +118,8 @@ class Enemy(Hooman):
 
 		if moving:
 			screen.blit(enemy_sprites[int(self.enemy_walk_count)], (int(self.x), int(self.y)))
-			print(int(self.enemy_walk_count))
 			self.enemy_walk_count += 0.1
 			
-
 
 # Main player Class (No multiplayer in this game)
 class Player:
@@ -135,7 +136,6 @@ class Player:
 		self.cooldown_counter = 0
 
 	def draw(self, window, right, down, left, up):
-		# window.blit(self.player_img, (self.x, self.y))
 		global walk_count
 		animation_speed = 0.1
 
@@ -156,7 +156,6 @@ class Player:
 			walk_count += animation_speed
 		else:
 			screen.blit(idle_img, (self.x,self.y))
-
 
 		for bullet in self.bullets:
 			bullet.draw(window)
@@ -202,9 +201,9 @@ class Bullet:
 		self.mask = pygame.mask.from_surface(self.bullet_img)
 		self.vertical = vertical
 		self.horiz = horiz
-
+		
 	def draw(self, window):
-		window.blit(self.bullet_img, (self.x + 8, self.y + 8))
+		window.blit(self.bullet_img, (self.x, self.y))
 
 	def collision(self, obj):
 		return collide(self, obj)
@@ -245,7 +244,7 @@ def main():
 
 	# Set enemy list, enemy speed and enemy amount
 	enemies = []
-	enemy_speed = 0.3
+	# enemy_speed = 0.3
 	enemy_walk_count = 0
 	wave_length = 0
 
@@ -267,13 +266,12 @@ def main():
 	walk_count = 0
 
 	def redraw_window():
-		screen.blit(background, (0, 0))
+		screen.blit(background_1, (0, 0))
 
 		#lives_text = font.render(f'Lives: {lives}', 1, (255, 255, 255))
-		level_text = font.render(f'Level: {level}', 1, (255, 255, 255))
-
+		#level_text = font.render(f'Level: {level}', 1, (255, 255, 255))
 		#screen.blit(lives_text, (5, 2))
-		screen.blit(level_text, (WIDTH - level_text.get_width() - 5, 2))
+		#screen.blit(level_text, (WIDTH - level_text.get_width() - 5, 2))
 
 		# Draw enemy sprite ingame
 		for enemy in enemies:
@@ -296,7 +294,8 @@ def main():
 
 		if len(enemies) == 0:
 			level += 1
-			wave_length += 2
+			wave_length += 10
+			print(wave_length)
 
 			# Initialize enemies in loop
 			for i in range(wave_length):
@@ -327,19 +326,19 @@ def main():
 		if keys[pygame.K_a] and player.x > 25:
 			player.x -= player_speed
 			left, right, up, down = True, False, False, False
-		if keys[pygame.K_d] and player.x + player.get_width() < WIDTH - 25: # -25 because map sprite has his own borders
+		if keys[pygame.K_d] and player.x + player.get_width() < WIDTH - 25: # -25 because map sprite has his own borders (cactus)
 			player.x += player_speed
 			left, right, up, down = False, True, False, False
 		if keys[pygame.K_w] and player.y > 25:
 			player.y -= player_speed
 			left, right, up, down = False, False, True, False
-		if keys[pygame.K_s] and player.y + player.get_height() < HEIGHT - 25: # -25 because map sprite has his own borders
+		if keys[pygame.K_s] and player.y + player.get_height() < HEIGHT - 25: # -25 because map sprite has his own borders (cactus)
 			player.y += player_speed
 			left, right, up, down = False, False, False, True
 		if not keys[pygame.K_s] and not keys[pygame.K_w] and not keys[pygame.K_d] and not keys[pygame.K_a]:
 			left, right, up, down = False, False, False, False
 
-		# Diagonall shooting
+		# Diagonal shooting
 		if keys[pygame.K_LEFT] and keys[pygame.K_UP]:
 			player.shoot(-1, -1)
 		if keys[pygame.K_RIGHT] and keys[pygame.K_UP]:
@@ -367,10 +366,9 @@ def main():
 			left, right, up, down = False, False, False, True
 			#pygame.mixer.Sound.play(shoot_sound)
 
-		
-		# Enemy movement, TODO: track player
+		# Enemy movement
 		for enemy in enemies:
-			enemy.move(enemy_speed, player.x, player.y)
+			enemy.move(player.x, player.y)
 
 			if collide(enemy, player):
 				pygame.mixer.Sound.play(cowboy_dead)				
@@ -390,7 +388,7 @@ def main_menu():
 	font = pygame.font.SysFont("freesansbold.ttf", 30)
 	run = True
 	while run:
-		screen.blit(background, (0,0))
+		screen.blit(background_1, (0,0))
 		title_text = font.render("Press any key to begin...", 1, (255,255,255))
 		screen.blit(title_text, (int(WIDTH/2 - title_text.get_width()/2), int(HEIGHT/2 - title_text.get_height()/2)))
 		
@@ -404,5 +402,5 @@ def main_menu():
 	pygame.quit()
 
 
-# Call main function to start game
+# Call main_menu function to start game
 main_menu()
