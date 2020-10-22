@@ -29,9 +29,9 @@ enemy_dead2 = pygame.mixer.Sound('sounds/enemy_dead2.wav')
 #steps_sound = pygame.mixer.Sound('sounds/steps.wav')
 
 # Set background image
-# background = pygame.transform.scale(pygame.image.load('assets/background.png'), (WIDTH, HEIGHT)).convert()
-background_1 = pygame.transform.scale(pygame.image.load('assets/background_1.png'), (WIDTH, HEIGHT)).convert()
-background_2 = pygame.transform.scale(pygame.image.load('assets/background_2.png'), (WIDTH, HEIGHT)).convert()
+background = pygame.transform.scale(pygame.image.load('assets/background.png'), (WIDTH, HEIGHT)).convert()
+cactus_1 = pygame.transform.scale(pygame.image.load('assets/cactus_1.png'), (WIDTH, HEIGHT))
+cactus_2 = pygame.transform.scale(pygame.image.load('assets/cactus_2.png'), (WIDTH, HEIGHT))
 
 # Player sprites
 idle_img = pygame.transform.scale(pygame.image.load('assets/idle.png'), (20, 20))
@@ -232,10 +232,25 @@ def collide(obj1, obj2):
 	offset_y = obj2.y - obj1.y
 	return obj1.mask.overlap(obj2.mask, (int(offset_x), int(offset_y))) != None
 
+
+def background_change():
+	global background_counter
+	animation_speed = 0.05
+	if 	background_counter >= 10:
+		background_counter = 0
+
+	if background_counter <= 5:
+		screen.blit(cactus_2, (0,0))
+		background_counter += animation_speed
+	elif background_counter > 5:
+		screen.blit(cactus_1, (0,0))
+		background_counter += animation_speed
+
 		
 # Main class, set up game and game loop
 def main():
 	global walk_count
+	global background_counter
 	
 	# Set FPS 
 	FPS = 120
@@ -249,6 +264,9 @@ def main():
 	# enemy_speed = 0.3
 	enemy_walk_count = 0
 	wave_length = 0
+
+	# Background
+	background_counter = 0
 
 	# Initialize Player class in (x, y) coords
 	player = Player(200, 200)
@@ -268,7 +286,8 @@ def main():
 	walk_count = 0
 
 	def redraw_window():
-		screen.blit(background_1, (0, 0))
+		screen.blit(background, (0,0))
+		background_change()
 
 		#lives_text = font.render(f'Lives: {lives}', 1, (255, 255, 255))
 		#level_text = font.render(f'Level: {level}', 1, (255, 255, 255))
@@ -296,7 +315,7 @@ def main():
 
 		if len(enemies) == 0:
 			level += 1
-			wave_length += 10
+			wave_length += 7
 			print(wave_length)
 
 			# Initialize enemies in loop
@@ -390,7 +409,7 @@ def main_menu():
 	font = pygame.font.SysFont("freesansbold.ttf", 30)
 	run = True
 	while run:
-		screen.blit(background_1, (0,0))
+		screen.blit(background, (0,0))
 		title_text = font.render("Press any key to begin...", 1, (255,255,255))
 		screen.blit(title_text, (int(WIDTH/2 - title_text.get_width()/2), int(HEIGHT/2 - title_text.get_height()/2)))
 		
