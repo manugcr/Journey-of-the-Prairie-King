@@ -109,8 +109,10 @@ class Enemy(Hooman):
 		dx = dx/dist
 		dy = dy/dist
 		# Move along this normalized vector towards the player at current speed.
-		self.x += dx * self.enemy_speed 
-		self.y += dy * self.enemy_speed 
+		if abs(dx) >= abs(dy):
+			self.x += dx * self.enemy_speed 
+		if abs(dy) > abs(dx):
+			self.y += dy * self.enemy_speed 
 
 	def draw(self, window, moving):
 		if self.enemy_walk_count + 1 >= 5:
