@@ -263,7 +263,7 @@ def main():
 	enemies = []
 	# enemy_speed = 0.3
 	enemy_walk_count = 0
-	wave_length = 3
+	wave_length = 5
 
 	# Background
 	background_counter = 0
@@ -289,10 +289,10 @@ def main():
 		screen.blit(background, (0,0))
 		background_change()
 
-		#lives_text = font.render(f'Lives: {lives}', 1, (255, 255, 255))
-		#level_text = font.render(f'Level: {level}', 1, (255, 255, 255))
-		#screen.blit(lives_text, (5, 2))
-		#screen.blit(level_text, (WIDTH - level_text.get_width() - 5, 2))
+		lives_text = font.render(f'Lives: {lives}', 1, (255, 255, 255))
+		level_text = font.render(f'Level: {level}', 1, (255, 255, 255))
+		screen.blit(lives_text, (5, 2))
+		screen.blit(level_text, (WIDTH - level_text.get_width() - 5, 2))
 
 		# Draw enemy sprite ingame
 		for enemy in enemies:
@@ -310,12 +310,9 @@ def main():
 		# Set ingame FPS
 		clock.tick(FPS)
 
-		if lives <= 0:
-			lost = True
-
 		if len(enemies) == 0:
 			level += 1
-			wave_length += 2
+			wave_length += 5
 			print(wave_length)
 
 			# Initialize enemies in loop
@@ -395,11 +392,15 @@ def main():
 				pygame.mixer.Sound.play(cowboy_dead)				
 				pygame.mixer.music.stop()
 				lives -= 1
+				level = 0
+				wave_length = 5
 				enemies.clear()
 				bullets.clear()
 				redraw_window()
 				pygame.time.delay(2800)
-				run = False
+				if lives < 0:
+					run = False
+				
 			
 		player.move_bullet(bullet_speed, enemies)
 
