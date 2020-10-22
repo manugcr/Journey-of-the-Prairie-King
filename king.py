@@ -395,6 +395,9 @@ def main():
 				pygame.mixer.Sound.play(cowboy_dead)				
 				pygame.mixer.music.stop()
 				lives -= 1
+				enemies.clear()
+				bullets.clear()
+				redraw_window()
 				pygame.time.delay(2800)
 				run = False
 			
