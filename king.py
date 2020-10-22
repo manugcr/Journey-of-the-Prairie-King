@@ -61,6 +61,9 @@ sprites_u = [u1, u2, u3, u4]
 
 # Enemy image
 enemy_image = pygame.transform.scale(pygame.image.load('assets/enemy.png'), (20, 20))
+enemy_r = pygame.transform.scale(pygame.image.load('assets/enemy_right_foot.png'), (20, 20))
+enemy_l = pygame.transform.scale(pygame.image.load('assets/enemy_left_foot.png'), (20, 20))
+enemy_sprites = [enemy_l, enemy_l, enemy_r, enemy_r]
 
 # Set bullet image
 bullet_img = pygame.transform.scale(pygame.image.load('assets/bullet.png'), (5, 5))
@@ -76,8 +79,8 @@ class Hooman:
 		self.bullets = []
 		self.cooldown_counter = 0
 
-	def draw(self, window):
-		window.blit(self.hooman_img, (int(self.x), int(self.y)))
+	# def draw(self, window):
+	# 	window.blit(self.hooman_img, (int(self.x), int(self.y)))
 
 	def get_width(self):
 		return self.hooman_img.get_width()
@@ -88,8 +91,9 @@ class Hooman:
 
 # Enemy 1 class, inherits from Hooman
 class Enemy(Hooman):
-	def __init__(self, x, y, health = 100):
+	def __init__(self, x, y, walk, health = 100):
 		super().__init__(x, y, health)
+		self.enemy_walk_count = walk
 		self.hooman_img = enemy_image
 		self.mask = pygame.mask.from_surface(self.hooman_img)
 
@@ -104,6 +108,16 @@ class Enemy(Hooman):
 		# Move along this normalized vector towards the player at current speed.
 		self.x += dx * vel
 		self.y += dy * vel
+
+	def draw(self, window, moving):
+		if self.enemy_walk_count + 1 >= 5:
+			self.enemy_walk_count = 0
+
+		if moving:
+			screen.blit(enemy_sprites[int(self.enemy_walk_count)], (int(self.x), int(self.y)))
+			print(int(self.enemy_walk_count))
+			self.enemy_walk_count += 0.1
+			
 
 
 # Main player Class (No multiplayer in this game)
@@ -122,24 +136,24 @@ class Player:
 
 	def draw(self, window, right, down, left, up):
 		# window.blit(self.player_img, (self.x, self.y))
-
 		global walk_count
+		animation_speed = 0.1
 
-		if walk_count + 1 >= 16:
+		if walk_count + 1 >= 5:
 			walk_count = 0
 		
 		if right:
-			screen.blit(sprites_r[walk_count//4], (self.x,self.y))
-			walk_count += 1
+			screen.blit(sprites_r[int(walk_count)], (self.x,self.y))
+			walk_count += animation_speed
 		elif down:
-			screen.blit(sprites_d[walk_count//4], (self.x,self.y))
-			walk_count += 1
+			screen.blit(sprites_d[int(walk_count)], (self.x,self.y))
+			walk_count += animation_speed
 		elif left:
-			screen.blit(sprites_l[walk_count//4], (self.x,self.y))
-			walk_count += 1
+			screen.blit(sprites_l[int(walk_count)], (self.x,self.y))
+			walk_count += animation_speed
 		elif up:
-			screen.blit(sprites_u[walk_count//4], (self.x,self.y))
-			walk_count += 1
+			screen.blit(sprites_u[int(walk_count)], (self.x,self.y))
+			walk_count += animation_speed
 		else:
 			screen.blit(idle_img, (self.x,self.y))
 
@@ -221,6 +235,7 @@ def collide(obj1, obj2):
 # Main class, set up game and game loop
 def main():
 	global walk_count
+	
 	# Set FPS 
 	FPS = 120
 	clock = pygame.time.Clock()
@@ -231,6 +246,7 @@ def main():
 	# Set enemy list, enemy speed and enemy amount
 	enemies = []
 	enemy_speed = 0.3
+	enemy_walk_count = 0
 	wave_length = 0
 
 	# Initialize Player class in (x, y) coords
@@ -261,7 +277,8 @@ def main():
 
 		# Draw enemy sprite ingame
 		for enemy in enemies:
-			enemy.draw(screen)
+			moving = True
+			enemy.draw(screen, moving)
 
 		# Draw player sprite ingame
 		player.draw(screen, right, down, left, up)
@@ -279,7 +296,7 @@ def main():
 
 		if len(enemies) == 0:
 			level += 1
-			wave_length += 5
+			wave_length += 2
 
 			# Initialize enemies in loop
 			for i in range(wave_length):
@@ -287,16 +304,16 @@ def main():
 				
 				# If condition
 				if door == 'left_door':
-					enemy = Enemy(random.randrange(-200, -20), random.randrange(180, 220))
+					enemy = Enemy(random.randrange(-200, -20), random.randrange(180, 220), enemy_walk_count)
 					enemies.append(enemy)
 				if door == 'top_door':
-					enemy = Enemy(random.randrange(180, 220), random.randrange(-100, -20))
+					enemy = Enemy(random.randrange(180, 220), random.randrange(-100, -20), enemy_walk_count)
 					enemies.append(enemy)
 				if door == 'right_door':
-					enemy = Enemy(random.randrange(420, 500), random.randrange(180, 220))
+					enemy = Enemy(random.randrange(420, 500), random.randrange(180, 220), enemy_walk_count)
 					enemies.append(enemy)
 				if door == 'down_door':
-					enemy = Enemy(random.randrange(180, 220), random.randrange(420, 500))
+					enemy = Enemy(random.randrange(180, 220), random.randrange(420, 500), enemy_walk_count)
 					enemies.append(enemy)
 
 		# QUIT event, dont delete
@@ -309,33 +326,18 @@ def main():
 		keys = pygame.key.get_pressed()
 		if keys[pygame.K_a] and player.x > 25:
 			player.x -= player_speed
-			left = True
-			right = False
-			up = False
-			down = False
+			left, right, up, down = True, False, False, False
 		if keys[pygame.K_d] and player.x + player.get_width() < WIDTH - 25: # -25 because map sprite has his own borders
 			player.x += player_speed
-			left = False
-			right = True
-			up = False
-			down = False
+			left, right, up, down = False, True, False, False
 		if keys[pygame.K_w] and player.y > 25:
 			player.y -= player_speed
-			left = False
-			right = False
-			up = True
-			down = False
+			left, right, up, down = False, False, True, False
 		if keys[pygame.K_s] and player.y + player.get_height() < HEIGHT - 25: # -25 because map sprite has his own borders
 			player.y += player_speed
-			left = False
-			right = False
-			up = False
-			down = True
+			left, right, up, down = False, False, False, True
 		if not keys[pygame.K_s] and not keys[pygame.K_w] and not keys[pygame.K_d] and not keys[pygame.K_a]:
-			left = False
-			right = False
-			up = False
-			down = False
+			left, right, up, down = False, False, False, False
 
 		# Diagonall shooting
 		if keys[pygame.K_LEFT] and keys[pygame.K_UP]:
@@ -350,19 +352,22 @@ def main():
 		# Shooting keys
 		if keys[pygame.K_LEFT]:
 			player.shoot(-1, 0)
+			left, right, up, down = True, False, False, False
 			#pygame.mixer.Sound.play(shoot_sound)
 		if keys[pygame.K_RIGHT]:
 			player.shoot(1, 0)
+			left, right, up, down = False, True, False, False
 			#pygame.mixer.Sound.play(shoot_sound)
 		if keys[pygame.K_UP]:
 			player.shoot(0, -1)
+			left, right, up, down = False, False, True, False
 			#pygame.mixer.Sound.play(shoot_sound)
 		if keys[pygame.K_DOWN]:
 			player.shoot(0, 1)
+			left, right, up, down = False, False, False, True
 			#pygame.mixer.Sound.play(shoot_sound)
 
 		
-			
 		# Enemy movement, TODO: track player
 		for enemy in enemies:
 			enemy.move(enemy_speed, player.x, player.y)
