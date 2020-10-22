@@ -34,39 +34,39 @@ cactus_1 = pygame.transform.scale(pygame.image.load('assets/cactus_1.png'), (WID
 cactus_2 = pygame.transform.scale(pygame.image.load('assets/cactus_2.png'), (WIDTH, HEIGHT))
 
 # Player sprites
-idle_img = pygame.transform.scale(pygame.image.load('assets/idle.png'), (20, 20))
+idle_img = pygame.transform.scale(pygame.image.load('assets/idle.png'), (25, 25))
 
-r1 = pygame.transform.scale(pygame.image.load('assets/r1.png'), (20, 20))
-r2 = pygame.transform.scale(pygame.image.load('assets/r2.png'), (20, 20))
-r3 = pygame.transform.scale(pygame.image.load('assets/r3.png'), (20, 20))
-r4 = pygame.transform.scale(pygame.image.load('assets/r4.png'), (20, 20))
+r1 = pygame.transform.scale(pygame.image.load('assets/r1.png'), (25, 25))
+r2 = pygame.transform.scale(pygame.image.load('assets/r2.png'), (25, 25))
+r3 = pygame.transform.scale(pygame.image.load('assets/r3.png'), (25, 25))
+r4 = pygame.transform.scale(pygame.image.load('assets/r4.png'), (25, 25))
 sprites_r = [r1, r2, r3, r4]
 
-d1 = pygame.transform.scale(pygame.image.load('assets/d1.png'), (20, 20))
-d2 = pygame.transform.scale(pygame.image.load('assets/d2.png'), (20, 20))
-d3 = pygame.transform.scale(pygame.image.load('assets/d3.png'), (20, 20))
-d4 = pygame.transform.scale(pygame.image.load('assets/d4.png'), (20, 20))
+d1 = pygame.transform.scale(pygame.image.load('assets/d1.png'), (25, 25))
+d2 = pygame.transform.scale(pygame.image.load('assets/d2.png'), (25, 25))
+d3 = pygame.transform.scale(pygame.image.load('assets/d3.png'), (25, 25))
+d4 = pygame.transform.scale(pygame.image.load('assets/d4.png'), (25, 25))
 sprites_d = [d1, d2, d3, d4]
 
-l1 = pygame.transform.scale(pygame.image.load('assets/l1.png'), (20, 20))
-l2 = pygame.transform.scale(pygame.image.load('assets/l2.png'), (20, 20))
-l3 = pygame.transform.scale(pygame.image.load('assets/l3.png'), (20, 20))
-l4 = pygame.transform.scale(pygame.image.load('assets/l4.png'), (20, 20))
+l1 = pygame.transform.scale(pygame.image.load('assets/l1.png'), (25, 25))
+l2 = pygame.transform.scale(pygame.image.load('assets/l2.png'), (25, 25))
+l3 = pygame.transform.scale(pygame.image.load('assets/l3.png'), (25, 25))
+l4 = pygame.transform.scale(pygame.image.load('assets/l4.png'), (25, 25))
 sprites_l = [l1, l2, l3, l4]
 
-u1 = pygame.transform.scale(pygame.image.load('assets/u1.png'), (20, 20))
-u2 = pygame.transform.scale(pygame.image.load('assets/u2.png'), (20, 20))
-u3 = pygame.transform.scale(pygame.image.load('assets/u3.png'), (20, 20))
-u4 = pygame.transform.scale(pygame.image.load('assets/u4.png'), (20, 20))
+u1 = pygame.transform.scale(pygame.image.load('assets/u1.png'), (25, 25))
+u2 = pygame.transform.scale(pygame.image.load('assets/u2.png'), (25, 25))
+u3 = pygame.transform.scale(pygame.image.load('assets/u3.png'), (25, 25))
+u4 = pygame.transform.scale(pygame.image.load('assets/u4.png'), (25, 25))
 sprites_u = [u1, u2, u3, u4]
 
 # Enemy image
-enemy_r = pygame.transform.scale(pygame.image.load('assets/enemy_right_foot.png'), (20, 20))
-enemy_l = pygame.transform.scale(pygame.image.load('assets/enemy_left_foot.png'), (20, 20))
+enemy_r = pygame.transform.scale(pygame.image.load('assets/enemy_right_foot.png'), (25, 25))
+enemy_l = pygame.transform.scale(pygame.image.load('assets/enemy_left_foot.png'), (25, 25))
 enemy_sprites = [enemy_l, enemy_l, enemy_r, enemy_r]
 
 # Set bullet image
-bullet_img = pygame.transform.scale(pygame.image.load('assets/bullet.png'), (5, 5))
+bullet_img = pygame.transform.scale(pygame.image.load('assets/bullet.png'), (8, 8))
 
 
 # Enemy base class, planning to implement more types.
