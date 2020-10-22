@@ -3,4 +3,4 @@ Stardew Valley minigame "Journey of the Prairie King" with pygame
 
 #### WORK IN PROGRESS
 
-![FlimsyValidBrahmanbull-mobile](https://user-images.githubusercontent.com/20894332/96916227-a6fd0780-147d-11eb-92e4-04d3926f5b79.gif)
+![example](https://user-images.githubusercontent.com/20894332/96931677-0c5bf300-1494-11eb-8c35-535d21894c71.gif)
