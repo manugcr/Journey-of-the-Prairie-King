@@ -263,7 +263,7 @@ def main():
 	enemies = []
 	# enemy_speed = 0.3
 	enemy_walk_count = 0
-	wave_length = 0
+	wave_length = 3
 
 	# Background
 	background_counter = 0
@@ -315,7 +315,7 @@ def main():
 
 		if len(enemies) == 0:
 			level += 1
-			wave_length += 7
+			wave_length += 2
 			print(wave_length)
 
 			# Initialize enemies in loop
