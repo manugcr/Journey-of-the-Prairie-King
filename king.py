@@ -301,7 +301,7 @@ def main():
 
 	# Level setup
 	level = 0
-	wave_lenght = 5
+	wave_lenght = 10
 	lives = 3
 	lost = False
 
@@ -421,9 +421,9 @@ def main():
 				pygame.time.delay(3000)
 				pygame.mixer.music.play(-1)
 				redraw_window()
-				if lives < 0:
-					pygame.mixer.music.stop()
-					run = False
+				# if lives < 0:
+				pygame.mixer.music.stop()
+				run = False
 
 		# REFRESH WINDOW USING FUNCTION
 		player.move_bullet(bullet_speed, enemies)
