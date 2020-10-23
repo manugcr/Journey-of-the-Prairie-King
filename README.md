@@ -10,7 +10,7 @@ Stardew Valley minigame "Journey of the Prairie King" with pygame
 * [Twitter](https://twitter.com/concernedape)
 
 # Requirements
-* Python 3.5
+* Python 3.5+
 * Pygame 1.9.6
 ```
   # Install requirements
