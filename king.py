@@ -30,327 +30,330 @@ enemy_dead2 = pygame.mixer.Sound('sounds/enemy_dead2.wav')
 
 # Set background image
 background = pygame.transform.scale(pygame.image.load('assets/background.png'), (WIDTH, HEIGHT)).convert()
-cactus_1 = pygame.transform.scale(pygame.image.load('assets/cactus_1.png'), (WIDTH, HEIGHT))
-cactus_2 = pygame.transform.scale(pygame.image.load('assets/cactus_2.png'), (WIDTH, HEIGHT))
+cactus_1 = pygame.transform.scale(pygame.image.load('assets/background1.png'), (WIDTH, HEIGHT)).convert()
+cactus_2 = pygame.transform.scale(pygame.image.load('assets/background2.png'), (WIDTH, HEIGHT)).convert()
+background_sprites = [cactus_1, cactus_1, cactus_2, cactus_2]
 
 # Player sprites
 idle_img = pygame.transform.scale(pygame.image.load('assets/idle.png'), (25, 25))
-
-r1 = pygame.transform.scale(pygame.image.load('assets/r1.png'), (25, 25))
-r2 = pygame.transform.scale(pygame.image.load('assets/r2.png'), (25, 25))
-r3 = pygame.transform.scale(pygame.image.load('assets/r3.png'), (25, 25))
-r4 = pygame.transform.scale(pygame.image.load('assets/r4.png'), (25, 25))
-sprites_r = [r1, r2, r3, r4]
-
-d1 = pygame.transform.scale(pygame.image.load('assets/d1.png'), (25, 25))
-d2 = pygame.transform.scale(pygame.image.load('assets/d2.png'), (25, 25))
-d3 = pygame.transform.scale(pygame.image.load('assets/d3.png'), (25, 25))
-d4 = pygame.transform.scale(pygame.image.load('assets/d4.png'), (25, 25))
-sprites_d = [d1, d2, d3, d4]
-
 l1 = pygame.transform.scale(pygame.image.load('assets/l1.png'), (25, 25))
 l2 = pygame.transform.scale(pygame.image.load('assets/l2.png'), (25, 25))
 l3 = pygame.transform.scale(pygame.image.load('assets/l3.png'), (25, 25))
 l4 = pygame.transform.scale(pygame.image.load('assets/l4.png'), (25, 25))
-sprites_l = [l1, l2, l3, l4]
-
+r1 = pygame.transform.scale(pygame.image.load('assets/r1.png'), (25, 25))
+r2 = pygame.transform.scale(pygame.image.load('assets/r2.png'), (25, 25))
+r3 = pygame.transform.scale(pygame.image.load('assets/r3.png'), (25, 25))
+r4 = pygame.transform.scale(pygame.image.load('assets/r4.png'), (25, 25))
 u1 = pygame.transform.scale(pygame.image.load('assets/u1.png'), (25, 25))
 u2 = pygame.transform.scale(pygame.image.load('assets/u2.png'), (25, 25))
 u3 = pygame.transform.scale(pygame.image.load('assets/u3.png'), (25, 25))
 u4 = pygame.transform.scale(pygame.image.load('assets/u4.png'), (25, 25))
-sprites_u = [u1, u2, u3, u4]
+d1 = pygame.transform.scale(pygame.image.load('assets/d1.png'), (25, 25))
+d2 = pygame.transform.scale(pygame.image.load('assets/d2.png'), (25, 25))
+d3 = pygame.transform.scale(pygame.image.load('assets/d3.png'), (25, 25))
+d4 = pygame.transform.scale(pygame.image.load('assets/d4.png'), (25, 25))
+sprites_l, sprites_r, sprites_u, sprites_d = [l1, l2, l3, l4], [r1, r2, r3, r4], [u1, u2, u3, u4], [d1, d2, d3, d4]
 
 # Enemy image
-enemy_r = pygame.transform.scale(pygame.image.load('assets/enemy_right_foot.png'), (25, 25))
 enemy_l = pygame.transform.scale(pygame.image.load('assets/enemy_left_foot.png'), (25, 25))
+enemy_r = pygame.transform.scale(pygame.image.load('assets/enemy_right_foot.png'), (25, 25))
 enemy_sprites = [enemy_l, enemy_l, enemy_r, enemy_r]
 
 # Set bullet image
 bullet_img = pygame.transform.scale(pygame.image.load('assets/bullet.png'), (8, 8))
 
 
-# Enemy base class, planning to implement more types.
-class Hooman:
-	def __init__(self, x, y, health = 100, enemy_speed = 0.2):
-		self.x = x
-		self.y = y
-		self.health = health
-		self.enemy_speed = enemy_speed
-		self.hooman_img = None
-		self.bullet_img = None
-		self.bullets = []
-		self.cooldown_counter = 0
+class Enemy:
+	def __init__(self, x, y, enemy_sprite_num):
+			self.x = x
+			self.y = y 
+			self.enemy_speed = random.uniform(0.2, 0.5) # Default 0.2
+			self.enemy_img = enemy_sprites[0]
+			self.enemy_sprite_num = enemy_sprite_num
+			self.moving = True
+			
+	def draw(self, screen):
+		# I couldnt make an enemy_animation() function like player, TODO.
+		animation_speed = 0.05
 
-	# def draw(self, window):
-	# 	window.blit(self.hooman_img, (int(self.x), int(self.y)))
+		if self.enemy_sprite_num >= 4:
+			self.enemy_sprite_num = 0
+
+		if self.moving:
+			#Create rect for each enemy, for collisions.
+			screen.blit(enemy_sprites[int(self.enemy_sprite_num)], self.get_rect())
+
+			# Animate enemy sprites.
+			self.enemy_sprite_num += animation_speed
+
+			# Debugging HITBOX
+			#pygame.draw.rect(screen, (0,255,255), self.get_rect(), 1)
+
+	def move(self, x, y):
+		# Find direc vector between enemy and player, and hyp(dx, dy)
+		dx, dy = x - self.x, y - self.y 
+		dist = math.hypot(dx, dy)
+		# Normalize vectors
+		dx, dy = dx/dist, dy/dist
+		# Move along X or Y axis depending on distance
+		if abs(dx) >= abs(dy):
+			self.x += dx * self.enemy_speed
+		elif abs(dy) > abs(dx):
+			self.y += dy * self.enemy_speed
+
+	def get_rect(self):
+		return self.enemy_img.get_rect(topleft = (int(self.x), int(self.y)))
 
 	def get_width(self):
-		return self.hooman_img.get_width()
+		return self.enemy_img.get_width()
 
 	def get_height(self):
-		return self.hooman_img.get_height()
+		return self.enemy_img.get_height()
 
-
-# Enemy 1 class, inherits from Hooman
-class Enemy(Hooman):
-	def __init__(self, x, y, walk, health = 100, enemy_speed = 0.2):
-		super().__init__(x, y, health, enemy_speed)
-		self.enemy_walk_count = walk
-		self.enemy_speed = random.uniform(0.2, 0.5)
-		self.hooman_img = enemy_sprites[0]
-		self.mask = pygame.mask.from_surface(self.hooman_img)
-
-	def move(self,x, y):
-		# Find direction vector between enemy and player.
-		dx = x - self.x
-		dy = y - self.y
-		dist = math.hypot(dx, dy)
-		# Normalize vector.
-		dx = dx/dist
-		dy = dy/dist
-		# Move along this normalized vector towards the player at current speed.
-		if abs(dx) >= abs(dy):
-			self.x += dx * self.enemy_speed 
-		if abs(dy) > abs(dx):
-			self.y += dy * self.enemy_speed 
-
-	def draw(self, window, moving):
-		if self.enemy_walk_count + 1 >= 5:
-			self.enemy_walk_count = 0
-
-		if moving:
-			screen.blit(enemy_sprites[int(self.enemy_walk_count)], (int(self.x), int(self.y)))
-			self.enemy_walk_count += 0.1
-			
-
-# Main player Class (No multiplayer in this game)
 class Player:
-	COOLDOWN = 45
+	COOLDOWN_TIME = 45
 
-	def __init__(self, x, y, health = 100):
-		self.x = x
-		self.y = y
-		self.health = health
-		self.idle_img = idle_img
+	def __init__(self, x, y):
+		self.x = x 
+		self.y = y 
+		self.player_img = idle_img
 		self.bullet_img = bullet_img
-		self.mask = pygame.mask.from_surface(self.idle_img)
 		self.bullets = []
-		self.cooldown_counter = 0
+		self.cooldown_count = 0
 
-	def draw(self, window, right, down, left, up):
-		global walk_count
-		animation_speed = 0.1
-
-		if walk_count + 1 >= 5:
-			walk_count = 0
-		
-		if right:
-			screen.blit(sprites_r[int(walk_count)], (self.x,self.y))
-			walk_count += animation_speed
-		elif down:
-			screen.blit(sprites_d[int(walk_count)], (self.x,self.y))
-			walk_count += animation_speed
-		elif left:
-			screen.blit(sprites_l[int(walk_count)], (self.x,self.y))
-			walk_count += animation_speed
+	def draw(self, left, right, up, down, screen):
+		# Draw sprites for given direction
+		if left:
+			player_animation(self.x, self.y, 1)
+		elif right:
+			player_animation(self.x, self.y, 2)
 		elif up:
-			screen.blit(sprites_u[int(walk_count)], (self.x,self.y))
-			walk_count += animation_speed
+			player_animation(self.x, self.y, 3)
+		elif down:
+			player_animation(self.x, self.y, 4)
 		else:
-			screen.blit(idle_img, (self.x,self.y))
+			player_animation(self.x, self.y)
 
+		# Draw bullet sprite on screen
 		for bullet in self.bullets:
-			bullet.draw(window)
+			bullet.draw(screen)
 
-	def move_bullet(self, vel, objs):
+		# Debugging HITBOX
+		#pygame.draw.rect(screen, (255,0,255), self.get_rect(), 1)
+
+	def move_bullet(self, speed, enemies):
 		self.cooldown()
+		# Loops through all bullets in bullets[] 
 		for bullet in self.bullets:
-			bullet.move(vel, bullet.horiz, bullet.vertical)
+			# Move bullet with hor and vert direction
+			bullet.move(speed, bullet.hor, bullet.vert)
 			if bullet.off_screen(HEIGHT, WIDTH):
 				self.bullets.remove(bullet)
-			else:
-				for obj in objs:
-					if bullet.collision(obj):
+			else: # Checks collision bullet-enemy
+				for enemy in enemies:
+					if bullet.collision(enemy.get_rect()): # Checks bullet - enemy collision
 						pygame.mixer.Sound.play(random.choice([enemy_dead1, enemy_dead2]))
-						objs.remove(obj)
+						enemies.remove(enemy)
 						if bullet in self.bullets:
 							self.bullets.remove(bullet)
 
 	def cooldown(self):
-		if self.cooldown_counter >= self.COOLDOWN:
-			self.cooldown_counter = 0
-		elif self.cooldown_counter > 0:
-			self.cooldown_counter += 1
+		# COOLDOWN_TIME at top of Player class
+		if self.cooldown_count >= self.COOLDOWN_TIME:
+			self.cooldown_count = 0
+		elif self.cooldown_count > 0:
+			self.cooldown_count += 1
 
-	def shoot(self, dir1, dir2):
-		if self.cooldown_counter == 0:
-			bullet = Bullet(self.x, self.y, dir1, dir2)
+	def shoot(self, hor, vert):
+		# Create new Bullet (using Bullet class) if cooldown equals 0
+		if self.cooldown_count == 0:
+			# Creates a bullet facing given direction
+			bullet = Bullet(self.x, self.y, hor, vert)
 			self.bullets.append(bullet)
-			self.cooldown_counter = 1
-
+			self.cooldown_count = 1
+	
+	def get_rect(self):
+		return self.player_img.get_rect(topleft = (int(self.x), int(self.y)))
+		
 	def get_width(self):
-		return self.idle_img.get_width()
-
+		return self.player_img.get_width()
+	
 	def get_height(self):
-		return self.idle_img.get_height()
+		return self.player_img.get_height()
 
 
 class Bullet:
-	def __init__(self, x, y, horiz, vertical):
-		self.x = x
-		self.y = y
+	def __init__(self, x, y, hor, vert):
+		self.x = x + 10 # + 10 so the bullet shoots from the middle of the player
+		self.y = y + 10 # + 10 so the bullet shoots from the middle of the player
+		self.hor = hor
+		self.vert = vert
 		self.bullet_img = bullet_img
-		self.mask = pygame.mask.from_surface(self.bullet_img)
-		self.vertical = vertical
-		self.horiz = horiz
-		
-	def draw(self, window):
-		window.blit(self.bullet_img, (self.x, self.y))
 
-	def collision(self, obj):
-		return collide(self, obj)
+	def draw(self, screen):
+		# Draw bullet on player
+		screen.blit(self.bullet_img, (self.x, self.y))
+
+		# Debugging HITBOX
+		#pygame.draw.rect(screen, (255,0,255), self.get_rect(), 1)
 
 	def off_screen(self, height, width):
-		if self.y >= height or self.y <= 0:
-			return True
+		# Delete bullet if outside bounds
 		if self.x >= width or self.x <= 0:
 			return True
+		if self.y >= height or self.y <= 0:
+			return True
 
-	def move(self, vel, horiz, vertical):
-		if horiz == 1:
-			self.x += vel
-		elif horiz == -1:
-			self.x -= vel
-		if vertical == 1:
-			self.y += vel
-		elif vertical == -1:
-			self.y -= vel
+	def move(self, speed, hor, vert):
+		# Move bullet depending on player direction, 1 equals positive movement, -1 negative movement
+		if hor == 1:
+			self.x += speed
+		elif hor == -1:
+			self.x -= speed
+		if vert == 1:
+			self.y += speed
+		elif vert == -1:
+			self.y -= speed
 
+	def collision(self, obj):
+		return check_collision(self.get_rect(), obj)
 
-def collide(obj1, obj2):
-	offset_x = obj2.x - obj1.x
-	offset_y = obj2.y - obj1.y
-	return obj1.mask.overlap(obj2.mask, (int(offset_x), int(offset_y))) != None
-
-
-def background_change():
-	global background_counter
-	animation_speed = 0.05
-	if 	background_counter >= 10:
-		background_counter = 0
-
-	if background_counter <= 5:
-		screen.blit(cactus_2, (0,0))
-		background_counter += animation_speed
-	elif background_counter > 5:
-		screen.blit(cactus_1, (0,0))
-		background_counter += animation_speed
-
-		
-# Main class, set up game and game loop
-def main():
-	global walk_count
-	global background_counter
+	def get_rect(self):
+		return self.bullet_img.get_rect(topleft = (int(self.x), int(self.y)))
 	
-	# Set FPS 
+
+def check_collision(obj1, obj2):
+	# Checks collisions ONLY between rects. Returns True or False.
+	return obj1.colliderect(obj2)
+
+def player_animation(x, y, direction = None):
+	global player_sprite_num
+	animation_speed = 0.05
+
+	# >= 4 because there are only 4 player sprites per direction
+	if player_sprite_num >= 4:
+		player_sprite_num = 0
+
+	# 1 = left, 2 = right, 3 = up, 4 = down, None = idle
+	if direction == 1:
+		screen.blit(sprites_l[int(player_sprite_num)], (x, y))
+		player_sprite_num += animation_speed
+	elif direction == 2:
+		screen.blit(sprites_r[int(player_sprite_num)], (x, y))
+		player_sprite_num += animation_speed
+	elif direction == 3:
+		screen.blit(sprites_u[int(player_sprite_num)], (x, y))
+		player_sprite_num += animation_speed
+	elif direction == 4:
+		screen.blit(sprites_d[int(player_sprite_num)], (x, y))
+		player_sprite_num += animation_speed
+	elif direction == None:
+		screen.blit(idle_img, (x, y))
+
+def background_animation():
+	global background_sprite_num
+	animation_speed = 0.01
+
+	# >= 2 because there are only 2 background sprites
+	if background_sprite_num >= 2:
+		background_sprite_num = 0
+
+	if background_sprite_num < 1:
+		screen.blit(cactus_1, (0, 0))
+		background_sprite_num += animation_speed
+	elif  background_sprite_num >= 1:
+		screen.blit(cactus_2, (0,0))
+		background_sprite_num += animation_speed
+
+def main():
+	# Clock Setup
 	FPS = 120
 	clock = pygame.time.Clock()
+	
+	# Font Setup, arial, comicsans, helvetica, verdana etc
+	font = pygame.font.SysFont('freesansbold', 32)
 
-	# Fonts
-	font = pygame.font.SysFont('freesansbold.ttf', 32)
-
-	# Set enemy list, enemy speed and enemy amount
-	enemies = []
-	# enemy_speed = 0.3
-	enemy_walk_count = 0
-	wave_length = 5
-
-	# Background
-	background_counter = 0
-
-	# Initialize Player class in (x, y) coords
-	player = Player(200, 200)
+	# Music
 	pygame.mixer.music.play(-1)
+
+	# Background animation setup
+	global background_sprite_num
+	background_sprite_num = 0
+
+	# Initialize Player class, Player facing direction
+	player = Player(200, 200)
 	player_speed = 1
-	bullet_speed = 2
+	left = False
+	right = False
+	up = False
+	down = False
+	# Number to change between items in player sprite list
+	global player_sprite_num
+	player_sprite_num = 0
+
+	# Enemy setup
+	enemies = []
+	enemy_sprite_num = 0
+
+	# Bullet setup
 	bullets = []
+	bullet_speed = 2
+
+	# Level setup
 	level = 0
+	wave_lenght = 5
 	lives = 3
 	lost = False
 
-	# Animation
-	right = False
-	down = False
-	left = False
-	up = False
-	walk_count = 0
-
+	# Refresh screen function
 	def redraw_window():
-		screen.blit(background, (0,0))
-		background_change()
-
+		# Update Background 
+		screen.blit(background, (0, 0))
+		background_animation()
+		
+		# Text
 		lives_text = font.render(f'Lives: {lives}', 1, (255, 255, 255))
 		level_text = font.render(f'Level: {level}', 1, (255, 255, 255))
 		screen.blit(lives_text, (5, 2))
 		screen.blit(level_text, (WIDTH - level_text.get_width() - 5, 2))
 
-		# Draw enemy sprite ingame
+		# Update Enemies
 		for enemy in enemies:
-			moving = True
-			enemy.draw(screen, moving)
+			enemy.draw(screen)
 
-		# Draw player sprite ingame
-		player.draw(screen, right, down, left, up)
+		# Update Player
+		player.draw(left, right, up, down, screen)
+
+		# Update screen
 		pygame.display.update()
 
-	# Game loop
+
+	# GAME LOOP
 	run = True
 	while run:
-
-		# Set ingame FPS
+		# Set clock FPS
 		clock.tick(FPS)
 
-		if len(enemies) == 0:
-			level += 1
-			wave_length += 5
-			print(wave_length)
-
-			# Initialize enemies in loop
-			for i in range(wave_length):
-				door = random.choice(['left_door', 'top_door', 'right_door', 'down_door'])
-				
-				# If condition
-				if door == 'left_door':
-					enemy = Enemy(random.randrange(-200, -20), random.randrange(180, 220), enemy_walk_count)
-					enemies.append(enemy)
-				if door == 'top_door':
-					enemy = Enemy(random.randrange(180, 220), random.randrange(-100, -20), enemy_walk_count)
-					enemies.append(enemy)
-				if door == 'right_door':
-					enemy = Enemy(random.randrange(420, 500), random.randrange(180, 220), enemy_walk_count)
-					enemies.append(enemy)
-				if door == 'down_door':
-					enemy = Enemy(random.randrange(180, 220), random.randrange(420, 500), enemy_walk_count)
-					enemies.append(enemy)
-
-		# QUIT event, dont delete
+		# QUIT GAME LOOP, DONT DELETE
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				run = False
 				sys.exit()
 
-		# Player movement key mapping
+
+		# Player movement keymap
+		# Map boundaries added in conditionals
 		keys = pygame.key.get_pressed()
 		if keys[pygame.K_a] and player.x > 25:
 			player.x -= player_speed
 			left, right, up, down = True, False, False, False
-		if keys[pygame.K_d] and player.x + player.get_width() < WIDTH - 25: # -25 because map sprite has his own borders (cactus)
+		if keys[pygame.K_d] and player.x + player.get_width() < WIDTH - 25:
 			player.x += player_speed
 			left, right, up, down = False, True, False, False
 		if keys[pygame.K_w] and player.y > 25:
 			player.y -= player_speed
 			left, right, up, down = False, False, True, False
-		if keys[pygame.K_s] and player.y + player.get_height() < HEIGHT - 25: # -25 because map sprite has his own borders (cactus)
+		if keys[pygame.K_s] and player.y + player.get_height() < HEIGHT - 25:
 			player.y += player_speed
 			left, right, up, down = False, False, False, True
 		if not keys[pygame.K_s] and not keys[pygame.K_w] and not keys[pygame.K_d] and not keys[pygame.K_a]:
@@ -359,10 +362,10 @@ def main():
 		# Diagonal shooting
 		if keys[pygame.K_LEFT] and keys[pygame.K_UP]:
 			player.shoot(-1, -1)
-		if keys[pygame.K_RIGHT] and keys[pygame.K_UP]:
-			player.shoot(1, -1)
 		if keys[pygame.K_LEFT] and keys[pygame.K_DOWN]:
 			player.shoot(-1, 1)
+		if keys[pygame.K_RIGHT] and keys[pygame.K_UP]:
+			player.shoot(1, -1)
 		if keys[pygame.K_RIGHT] and keys[pygame.K_DOWN]:
 			player.shoot(1, 1)
 
@@ -370,51 +373,69 @@ def main():
 		if keys[pygame.K_LEFT]:
 			player.shoot(-1, 0)
 			left, right, up, down = True, False, False, False
-			#pygame.mixer.Sound.play(shoot_sound)
 		if keys[pygame.K_RIGHT]:
 			player.shoot(1, 0)
 			left, right, up, down = False, True, False, False
-			#pygame.mixer.Sound.play(shoot_sound)
 		if keys[pygame.K_UP]:
 			player.shoot(0, -1)
 			left, right, up, down = False, False, True, False
-			#pygame.mixer.Sound.play(shoot_sound)
 		if keys[pygame.K_DOWN]:
 			player.shoot(0, 1)
 			left, right, up, down = False, False, False, True
-			#pygame.mixer.Sound.play(shoot_sound)
+
+
+		# ENEMIES
+		if len(enemies) == 0:
+			level += 1
+			wave_lenght += 5
+
+			# Initialize enemies in loop
+			for i in range(wave_lenght):
+				# Choose door to spawn enemy
+				door = random.choice(['left_door', 'right_door', 'top_door', 'down_door'])
+				if door == 'left_door':
+					enemy = Enemy(random.randrange(-200, -20), random.randrange(180, 220), enemy_sprite_num)
+					enemies.append(enemy)
+				if door == 'right_door':
+					enemy = Enemy(random.randrange(420, 500), random.randrange(180, 220), enemy_sprite_num)
+					enemies.append(enemy)
+				if door == 'top_door':
+					enemy = Enemy(random.randrange(180, 220), random.randrange(-100, -20), enemy_sprite_num)
+					enemies.append(enemy)
+				if door == 'down_door':
+					enemy = Enemy(random.randrange(180, 220), random.randrange(420, 500), enemy_sprite_num)
+					enemies.append(enemy)
 
 		# Enemy movement
 		for enemy in enemies:
 			enemy.move(player.x, player.y)
 
-			if collide(enemy, player):
+			if check_collision(enemy.get_rect(), player.get_rect()):
 				pygame.mixer.Sound.play(cowboy_dead)
+				pygame.mixer.music.stop()
 				lives -= 1
 				level = 0
-				wave_length = 5
+				wave_lenght = 5
 				enemies.clear()
 				bullets.clear()
+				pygame.time.delay(3000)
+				pygame.mixer.music.play(-1)
 				redraw_window()
-				pygame.time.delay(2800)
 				if lives < 0:
 					pygame.mixer.music.stop()
 					run = False
-				
-			
-		player.move_bullet(bullet_speed, enemies)
 
-		# Redraw and update sprites, dont delete
+		# REFRESH WINDOW USING FUNCTION
+		player.move_bullet(bullet_speed, enemies)
 		redraw_window()
 		pygame.display.update()
 
-
 def main_menu():
-	font = pygame.font.SysFont("freesansbold.ttf", 30)
+	font = pygame.font.SysFont("freesansbold", 32)
 	run = True
 	while run:
 		screen.blit(background, (0,0))
-		title_text = font.render("Press any key to begin...", 1, (255,255,255))
+		title_text = font.render("Press space to begin...", 1, (255,255,255))
 		screen.blit(title_text, (int(WIDTH/2 - title_text.get_width()/2), int(HEIGHT/2 - title_text.get_height()/2)))
 		
 		pygame.display.update()
@@ -422,8 +443,10 @@ def main_menu():
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				run = False
-			if event.type == pygame.KEYDOWN:
-				main()
+			
+			elif event.type == pygame.KEYDOWN:
+				if event.key == pygame.K_SPACE:
+					main()
 	pygame.quit()
 
 
