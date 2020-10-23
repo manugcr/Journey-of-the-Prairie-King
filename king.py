@@ -389,8 +389,7 @@ def main():
 			enemy.move(player.x, player.y)
 
 			if collide(enemy, player):
-				pygame.mixer.Sound.play(cowboy_dead)				
-				pygame.mixer.music.stop()
+				pygame.mixer.Sound.play(cowboy_dead)
 				lives -= 1
 				level = 0
 				wave_length = 5
@@ -399,6 +398,7 @@ def main():
 				redraw_window()
 				pygame.time.delay(2800)
 				if lives < 0:
+					pygame.mixer.music.stop()
 					run = False
 				
 			
