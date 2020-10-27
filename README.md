@@ -5,7 +5,7 @@ Stardew Valley minigame "Journey of the Prairie King" with pygame
 
 ![mkv](https://user-images.githubusercontent.com/20894332/97039161-5c918e80-1542-11eb-9b3c-50d2c60e06f7.gif)
 
-# All textures are from Stardew Valley game. (Best game ever)
+# All textures are from Stardew Valley. (Best game ever)
 * [Web page](https://www.stardewvalley.net/)
 * [Twitter](https://twitter.com/concernedape)
 
